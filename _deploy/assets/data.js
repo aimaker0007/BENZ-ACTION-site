@@ -99,7 +99,13 @@ window.BENZ_GALLERY = [
 */
 window.BENZ_FILMOGRAPHY = [
 
-    { title: "Escape from the Outland", year: 2025, productionType: "feature",
+    { title: "Love Is Never Gone", year: 2025, productionType: "series",
+      poster: "assets/media/poster-love-is-never-gone.png",
+      link: "https://corporate.abs-cbn.com/newsroom/news-releases/2025/11/13/joshua-and-ivana-star-in-first-filipino-tv-series-shot-in-morocco?lang=en",
+      stunt: ["automobile", "combat", "safety"],
+      role_fr: "Cascades & coordination action",
+      role_en: "Stunts & action coordination" },
+{ title: "Escape from the Outland", year: 2025, productionType: "feature",
       poster: "assets/media/poster-escape-outland.jpg",
       link: "",
       stunt: ["automobile", "combat", "pyrotechnics"],
@@ -155,7 +161,7 @@ window.BENZ_FILMOGRAPHY = [
 
 /* ---------- LOGOS PARTENAIRES (texte) ---------- */
 window.BENZ_PARTNERS = [
-    "ESCAPE FROM THE OUTLAND", "THE TRAUMA CODE", "RAQQA", "RANSOMED", "STUDIO OUARZAZATE"
+    "LOVE IS NEVER GONE", "ESCAPE FROM THE OUTLAND", "THE TRAUMA CODE", "RAQQA", "RANSOMED", "STUDIO OUARZAZATE"
 ];
 
 
