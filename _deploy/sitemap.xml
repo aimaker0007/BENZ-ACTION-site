@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://benz-action.com/index.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/index.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/index.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/index.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/a-propos.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/a-propos.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/about.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/a-propos.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/services.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/services.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/services.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/services.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/showreel.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/showreel.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/showreel.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/showreel.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/galerie.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/galerie.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/gallery.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/galerie.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/references.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/references.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/references.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/references.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/formations.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/formations.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/training.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/formations.html"/>
+  </url>
+  <url>
+    <loc>https://benz-action.com/contact.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benz-action.com/contact.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benz-action.com/en/contact.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benz-action.com/contact.html"/>
+  </url>
+  <url><loc>https://benz-action.com/en/index.html</loc></url>
+  <url><loc>https://benz-action.com/en/about.html</loc></url>
+  <url><loc>https://benz-action.com/en/services.html</loc></url>
+  <url><loc>https://benz-action.com/en/showreel.html</loc></url>
+  <url><loc>https://benz-action.com/en/gallery.html</loc></url>
+  <url><loc>https://benz-action.com/en/references.html</loc></url>
+  <url><loc>https://benz-action.com/en/training.html</loc></url>
+  <url><loc>https://benz-action.com/en/contact.html</loc></url>
+</urlset>
