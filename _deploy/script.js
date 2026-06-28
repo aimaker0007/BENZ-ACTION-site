@@ -446,18 +446,32 @@
             });
             if (!ok) { if (firstBad) firstBad.focus(); return; }
 
-            var btn = form.querySelector('button[type="submit"]');
-            var original = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = "<span>" + t("form.sending") + "</span>";
-            setTimeout(function () {
-                btn.innerHTML = "<span>" + t("form.success") + "</span>";
-                btn.style.background = "linear-gradient(135deg,#16a34a,#15803d)";
-                setTimeout(function () {
-                    form.reset();
-                    btn.disabled = false; btn.innerHTML = original; btn.style.background = "";
-                }, 3500);
-            }, 1200);
+            var name = (form.querySelector("#name") || {}).value || "";
+            var email = (form.querySelector("#email") || {}).value || "";
+            var project = (form.querySelector("#project") || {}).value || "";
+            var type = (form.querySelector("#cascade-type") || {}).value || "";
+            var locationValue = (form.querySelector("#location") || {}).value || "";
+            var dates = (form.querySelector("#dates") || {}).value || "";
+            var description = (form.querySelector("#description") || {}).value || "";
+
+            var subject = "Demande BENZ-ACTION" + (project ? " - " + project : "");
+            var body = [
+                "Nom / Name: " + name,
+                "Email: " + email,
+                "Projet / Project: " + project,
+                "Type de cascade / Type of stunt: " + type,
+                "Lieu de tournage / Shooting location: " + locationValue,
+                "Dates: " + dates,
+                "",
+                "Descriptif technique / Technical description:",
+                description,
+                "",
+                "Envoye depuis / Sent from: " + location.href
+            ].join("\n");
+
+            window.location.href = "mailto:contact@benzaction.com?subject=" +
+                encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+            showToast(LANG === "en" ? "Your email app is opening. Please send the prepared message." : "Votre application mail va s'ouvrir. Envoyez le message prepare.");
         });
     }
 
