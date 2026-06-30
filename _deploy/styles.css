@@ -159,6 +159,7 @@ h1, h2, h3, h4 {
 }
 .nav-lang:hover { color: var(--color-white); border-color: var(--color-red); }
 .nav-lang::after { display: none !important; }
+.nav-lang-mobile { display: none; margin-left: auto; flex-shrink: 0; }
 
 .nav-cta {
     background: var(--color-red); padding: 10px 20px !important;
@@ -667,11 +668,13 @@ input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="
         transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid var(--color-border);
     }
     .nav-links.active { right: 0; }
+    .nav-lang-mobile { display: inline-flex; margin-left: auto; padding: 8px 12px; min-height: 36px; font-size: 0.78rem; }
+    .nav-links .nav-lang { display: none; }
     .nav-toggle { display: flex; z-index: 1001; }
     .nav-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
     .nav-toggle.active span:nth-child(2) { opacity: 0; }
     .nav-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
-    .nav-logo-img { height: 44px; }
+    .nav-logo-img { height: 44px; max-width: 185px; }
     .hero-title { font-size: clamp(2.5rem, 10vw, 4rem); }
     .hero-keywords { gap: 10px; font-size: 1rem; }
     .expertise-card { padding: 28px; }

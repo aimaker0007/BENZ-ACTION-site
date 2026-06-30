@@ -1,18 +1,18 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://benzaction.com/</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://benzaction.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/accueil.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benzaction.com/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://benzaction.com/"/>
   </url>
   <url>
     <loc>https://benzaction.com/a-propos.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/a-propos.html"/>
@@ -21,7 +21,7 @@
   </url>
   <url>
     <loc>https://benzaction.com/services.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/services.html"/>
@@ -30,7 +30,7 @@
   </url>
   <url>
     <loc>https://benzaction.com/showreel.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/showreel.html"/>
@@ -39,7 +39,7 @@
   </url>
   <url>
     <loc>https://benzaction.com/galerie.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/galerie.html"/>
@@ -48,7 +48,7 @@
   </url>
   <url>
     <loc>https://benzaction.com/references.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/references.html"/>
@@ -57,7 +57,7 @@
   </url>
   <url>
     <loc>https://benzaction.com/formations.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/formations.html"/>
@@ -66,19 +66,28 @@
   </url>
   <url>
     <loc>https://benzaction.com/contact.html</loc>
-    <lastmod>2026-06-29</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/contact.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://benzaction.com/en/contact.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://benzaction.com/contact.html"/>
   </url>
-  <url><loc>https://benzaction.com/en/</loc><lastmod>2026-06-29</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://benzaction.com/en/about.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://benzaction.com/en/services.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://benzaction.com/en/showreel.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://benzaction.com/en/gallery.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://benzaction.com/en/references.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://benzaction.com/en/training.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://benzaction.com/en/contact.html</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://benzaction.com/en/</loc><lastmod>2026-06-30</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://benzaction.com/en/about.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://benzaction.com/en/services.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://benzaction.com/en/showreel.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://benzaction.com/en/gallery.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://benzaction.com/en/references.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://benzaction.com/en/training.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://benzaction.com/en/contact.html</loc><lastmod>2026-06-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url>
+    <loc>https://benzaction.com/accueil.html</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://benzaction.com/accueil.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://benzaction.com/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://benzaction.com/"/>
+  </url>
 </urlset>
