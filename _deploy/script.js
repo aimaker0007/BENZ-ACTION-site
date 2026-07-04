@@ -1,529 +1,394 @@
-/* ============================================
-   BENZ-ACTION — Main runtime
-   i18n + language switch + components + behaviors
-   Works over file:// (no fetch). Data comes from
-   assets/i18n.js and assets/data.js (global objects).
-   ============================================ */
+/* ============================================================
+   BENZ-ACTION — Cinematic runtime
+   Works over file:// and GitHub Pages. Content from assets/data.js.
+   ============================================================ */
 (function () {
-    "use strict";
+  "use strict";
 
-    /* ---------- Language detection ---------- */
-    var LANG = (document.documentElement.getAttribute("lang") || "fr").toLowerCase().indexOf("en") === 0 ? "en" : "fr";
-    var DICT = (window.BENZ_I18N && window.BENZ_I18N[LANG]) || {};
-    var BASE = document.body.getAttribute("data-base") || ""; // "" at root, "../" under /en/
+  var BASE = document.body.getAttribute("data-base") || "";
+  var LANG = document.documentElement.lang === "fr" ? "fr" : "en";
+  var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var MOBILE = window.matchMedia("(max-width: 880px)").matches;
 
-    function t(key) {
-        return Object.prototype.hasOwnProperty.call(DICT, key) ? DICT[key] : key;
-    }
-    function cap(item, field) {
-        return item[field + "_" + LANG] || item[field + "_fr"] || "";
-    }
-    function reduceMotion() {
-        return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    }
-    // Resolve a local asset path against BASE so it works on / and /en/ pages
-    function media(path) {
-        if (!path) return "";
-        if (/^(https?:)?\/\//.test(path) || path.charAt(0) === "/") return path;
-        return BASE + path;
-    }
+  /* ---------- Navbar ---------- */
+  var nav = document.querySelector(".nav");
+  var burger = document.getElementById("navToggle");
+  var menu = document.getElementById("navMenu");
 
-    /* ---------- Apply i18n to [data-i18n] nodes ---------- */
-    function applyI18n(root) {
-        (root || document).querySelectorAll("[data-i18n]").forEach(function (el) {
-            el.textContent = t(el.getAttribute("data-i18n"));
-        });
-        (root || document).querySelectorAll("[data-i18n-attr]").forEach(function (el) {
-            // format: "attr:key,attr2:key2"
-            el.getAttribute("data-i18n-attr").split(",").forEach(function (pair) {
-                var p = pair.split(":");
-                if (p.length === 2) el.setAttribute(p[0].trim(), t(p[1].trim()));
-            });
-        });
-    }
+  function onScrollNav() {
+    if (nav) nav.classList.toggle("is-scrolled", window.scrollY > 30);
+  }
+  onScrollNav();
+  window.addEventListener("scroll", onScrollNav, { passive: true });
 
-    /* ---------- Language switcher ---------- */
-    function currentRouteKey() {
-        var path = location.pathname.replace(/\\/g, "/");
-        var parts = path.split("/").filter(Boolean);
-        var file = parts.length ? parts[parts.length - 1] : "index.html";
-        if (!file || file.indexOf(".html") === -1) file = "index.html";
-        // Are we under /en/ ?
-        var inEn = parts.indexOf("en") !== -1 && LANG === "en";
-        return inEn ? "en/" + file : file;
-    }
-    function targetHref() {
-        var key = currentRouteKey();
-        var map = window.BENZ_ROUTES || {};
-        var target = map[key];
-        if (!target) return null;
-        if (LANG === "fr") {
-            // going to EN: from root, target already like "en/xxx.html"
-            return BASE + target;
-        } else {
-            // going to FR: target like "xxx.html"; we're under /en/, go up one
-            return "../" + target;
-        }
-    }
-    function setupLangSwitcher() {
-        var btns = document.querySelectorAll("[data-lang-switch]");
-        var href = targetHref();
-        btns.forEach(function (btn) {
-            if (href) btn.setAttribute("href", href);
-            btn.addEventListener("click", function () {
-                try { localStorage.setItem("benz_lang", LANG === "fr" ? "en" : "fr"); } catch (e) {}
-            });
-        });
-        // persist current as preference on load
-        try { localStorage.setItem("benz_lang", LANG); } catch (e) {}
-    }
-
-    /* ---------- Navbar behaviors ---------- */
-    function setupNavbar() {
-        var navbar = document.getElementById("navbar");
-        if (navbar) {
-            window.addEventListener("scroll", function () {
-                if (window.pageYOffset > 60) navbar.classList.add("scrolled");
-                else navbar.classList.remove("scrolled");
-            });
-        }
-        var toggle = document.getElementById("navToggle");
-        var links = document.getElementById("navLinks");
-        if (toggle && links) {
-            toggle.addEventListener("click", function () {
-                var open = links.classList.toggle("active");
-                toggle.classList.toggle("active", open);
-                toggle.setAttribute("aria-expanded", open ? "true" : "false");
-                document.body.style.overflow = open ? "hidden" : "";
-            });
-            links.querySelectorAll("a").forEach(function (a) {
-                a.addEventListener("click", function () {
-                    links.classList.remove("active");
-                    toggle.classList.remove("active");
-                    toggle.setAttribute("aria-expanded", "false");
-                    document.body.style.overflow = "";
-                });
-            });
-        }
-    }
-
-    /* ---------- Scroll entrance animations ---------- */
-    function setupAos() {
-        var els = document.querySelectorAll("[data-aos]");
-        if (reduceMotion() || !("IntersectionObserver" in window)) {
-            els.forEach(function (el) { el.classList.add("aos-animate"); });
-            return;
-        }
-        var obs = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    var delay = parseInt(entry.target.getAttribute("data-aos-delay") || 0, 10);
-                    setTimeout(function () { entry.target.classList.add("aos-animate"); }, delay);
-                    obs.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
-        els.forEach(function (el) { obs.observe(el); });
-    }
-
-    /* ---------- Animated counters ---------- */
-    function setupCounters() {
-        var counters = document.querySelectorAll(".stat-number");
-        if (!counters.length) return;
-        function run(el) {
-            var target = parseInt(el.getAttribute("data-count"), 10) || 0;
-            if (reduceMotion() || target === 0) { el.textContent = target; return; }
-            var current = 0, step = target / (2000 / 16);
-            var timer = setInterval(function () {
-                current += step;
-                if (current >= target) { el.textContent = target; clearInterval(timer); }
-                else el.textContent = Math.floor(current);
-            }, 16);
-        }
-        if (!("IntersectionObserver" in window)) { counters.forEach(run); return; }
-        var obs = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) { run(entry.target); obs.unobserve(entry.target); }
-            });
-        }, { threshold: 0.5 });
-        counters.forEach(function (el) { obs.observe(el); });
-    }
-
-    /* ---------- Hero particles ---------- */
-    function setupParticles() {
-        var box = document.getElementById("particles");
-        if (!box || reduceMotion()) return;
-        var style = document.createElement("style");
-        style.textContent = "@keyframes benzFloat{0%,100%{transform:translateY(0) translateX(0);opacity:.4}25%{transform:translateY(-20px) translateX(10px);opacity:1}50%{transform:translateY(-10px) translateX(-10px);opacity:.6}75%{transform:translateY(-28px) translateX(6px);opacity:.85}}";
-        document.head.appendChild(style);
-        for (var i = 0; i < 28; i++) {
-            var p = document.createElement("span");
-            var s = Math.random() * 3 + 1;
-            p.style.cssText = "position:absolute;border-radius:50%;background:rgba(225,6,0," + (Math.random() * 0.4 + 0.12) + ");width:" + s + "px;height:" + s + "px;left:" + (Math.random() * 100) + "%;top:" + (Math.random() * 100) + "%;animation:benzFloat " + (Math.random() * 6 + 4) + "s ease-in-out infinite;animation-delay:" + (Math.random() * 4) + "s";
-            box.appendChild(p);
-        }
-    }
-
-    /* ---------- Media placeholder helper ---------- */
-    function placeholder(label) {
-        return '<div class="media-placeholder"><span class="media-ph-mark">REVOLUTION</span>' +
-               (label ? '<span class="media-ph-label">' + label + '</span>' : '') + '</div>';
-    }
-
-    /* ---------- Showreel player ---------- */
-    function setupShowreel() {
-        document.querySelectorAll("[data-showreel]").forEach(function (frame) {
-            var youtube = frame.getAttribute("data-youtube") || "";
-            var src = frame.getAttribute("data-src") || "";
-            var poster = frame.getAttribute("data-poster") || "";
-
-            // YouTube embed takes priority when provided
-            if (youtube) {
-                var logoSrc = (frame.getAttribute("data-logo")) || (BASE + "assets/logo.svg");
-                frame.innerHTML =
-                    '<button class="showreel__poster" type="button" aria-label="' + t("video.play") + '">' +
-                        '<span class="showreel__poster-bg" aria-hidden="true"></span>' +
-                        '<img class="showreel__poster-logo" src="' + logoSrc + '" alt="BENZ-ACTION Revolution">' +
-                        '<span class="showreel__play" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>' +
-                    '</button>';
-                var origin = (location.protocol === "http:" || location.protocol === "https:") ? "&origin=" + encodeURIComponent(location.origin) : "";
-                frame.querySelector(".showreel__poster").addEventListener("click", function () {
-                    var iframe = document.createElement("iframe");
-                    iframe.className = "showreel__embed";
-                    iframe.src = "https://www.youtube.com/embed/" + youtube + "?autoplay=1&rel=0&playsinline=1&modestbranding=1" + origin;
-                    iframe.title = "BENZ-ACTION Showreel";
-                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-                    iframe.setAttribute("allowfullscreen", "");
-                    frame.innerHTML = "";
-                    frame.appendChild(iframe);
-                });
-                // Always-working fallback link (in case embedding is disabled / error 153)
-                if (!frame.nextElementSibling || !frame.nextElementSibling.classList.contains("showreel__yt")) {
-                    var yt = document.createElement("a");
-                    yt.className = "showreel__yt";
-                    yt.href = "https://youtu.be/" + youtube;
-                    yt.target = "_blank";
-                    yt.rel = "noopener";
-                    yt.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#ff0000" d="M23 7.5a3 3 0 00-2.1-2.1C19 5 12 5 12 5s-7 0-8.9.4A3 3 0 001 7.5 31 31 0 00.6 12 31 31 0 001 16.5a3 3 0 002.1 2.1C5 19 12 19 12 19s7 0 8.9-.4a3 3 0 002.1-2.1A31 31 0 0023.4 12 31 31 0 0023 7.5z"/><path fill="#fff" d="M9.8 15.3l6-3.3-6-3.3z"/></svg>' +
-                        '<span>' + (LANG === "en" ? "Watch on YouTube" : "Regarder sur YouTube") + '</span>';
-                    frame.parentNode.insertBefore(yt, frame.nextSibling);
-                }
-                return;
-            }
-
-            if (!src) {
-                frame.innerHTML = placeholder("") +
-                    '<div class="showreel-fallback"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><p>' + t("showreel.unavailable") + '</p></div>';
-                return;
-            }
-            // Local video: branded logo poster first, load+play the video on click
-            var logoSrc2 = frame.getAttribute("data-logo") || (BASE + "assets/logo.svg");
-            frame.innerHTML =
-                '<button class="showreel__poster" type="button" aria-label="' + t("video.play") + '">' +
-                    '<span class="showreel__poster-bg" aria-hidden="true"></span>' +
-                    '<img class="showreel__poster-logo" src="' + logoSrc2 + '" alt="BENZ-ACTION Revolution">' +
-                    '<span class="showreel__play" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>' +
-                '</button>';
-            frame.querySelector(".showreel__poster").addEventListener("click", function () {
-                var video = document.createElement("video");
-                video.className = "showreel__video";
-                video.src = media(src);
-                video.setAttribute("playsinline", "");
-                video.setAttribute("controls", "");
-                video.muted = true;
-                if (poster) video.poster = media(poster);
-                video.addEventListener("error", function () {
-                    frame.innerHTML = placeholder("") + '<div class="showreel-fallback"><p>' + t("showreel.unavailable") + '</p></div>';
-                });
-                frame.innerHTML = "";
-                frame.appendChild(video);
-                var pr = video.play();
-                if (pr && pr.catch) { pr.catch(function () { video.controls = true; }); }
-            });
-        });
-    }
-
-    /* ---------- Gallery + filter ---------- */
-    var STUNTS = ["automobile", "combat", "height", "pyrotechnics", "safety"];
-    function setupGallery() {
-        var host = document.querySelector("[data-gallery]");
-        if (!host || !window.BENZ_GALLERY) return;
-        var onlyVideo = host.getAttribute("data-gallery") === "video";
-        var items = window.BENZ_GALLERY.filter(function (i) { return onlyVideo ? i.type === "video" : true; });
-        var bar = document.querySelector("[data-gallery-filter]");
-        var grid = document.createElement("div");
-        grid.className = "media-grid";
-        host.appendChild(grid);
-        var empty = document.createElement("p");
-        empty.className = "filter-empty"; empty.textContent = t("gallery.empty");
-        empty.style.display = "none";
-        host.appendChild(empty);
-
-        function render(filter) {
-            grid.innerHTML = "";
-            var shown = 0;
-            items.forEach(function (item) {
-                if (filter !== "all" && item.stunt.indexOf(filter) === -1) return;
-                shown++;
-                var fig = document.createElement("figure");
-                fig.className = "media-item" + (item.type === "video" ? " media-item--video" : "");
-                var inner = item.src ? "" : placeholder("");
-                var ytThumb = item.youtube ? "https://img.youtube.com/vi/" + item.youtube + "/hqdefault.jpg" : "";
-                if (item.type === "photo" && item.src) {
-                    inner = '<img src="' + media(item.src) + '" alt="' + cap(item, "caption") + '" loading="lazy" decoding="async">';
-                } else if (item.type === "video" && item.youtube) {
-                    inner = '<img src="' + ytThumb + '" alt="' + cap(item, "caption") + '" loading="lazy" decoding="async">';
-                } else if (item.type === "video" && item.src) {
-                    inner = '<video src="' + media(item.src) + '" poster="' + media(item.poster) + '" playsinline preload="metadata" controls></video>';
-                }
-                fig.innerHTML = inner +
-                    (item.type === "video" ? '<button class="media-play" type="button" aria-label="' + t("video.play") + '"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>' : "") +
-                    '<figcaption>' + cap(item, "caption") + '</figcaption>';
-                if (item.type === "video") {
-                    fig.querySelector(".media-play").addEventListener("click", function () {
-                        if (item.youtube) {
-                            var ifr = document.createElement("iframe");
-                            ifr.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0";
-                            ifr.src = "https://www.youtube.com/embed/" + item.youtube + "?autoplay=1&rel=0&playsinline=1";
-                            ifr.title = cap(item, "caption");
-                            ifr.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-                            ifr.setAttribute("allowfullscreen", "");
-                            fig.innerHTML = ""; fig.appendChild(ifr);
-                        } else {
-                            var v = fig.querySelector("video");
-                            if (v && v.src) { if (v.paused) v.play(); else v.pause(); this.style.opacity = "0"; }
-                        }
-                    });
-                }
-                grid.appendChild(fig);
-            });
-            empty.style.display = shown ? "none" : "block";
-        }
-
-        if (bar) {
-            // Only show categories that actually have items
-            var present = {};
-            items.forEach(function (it) { (it.stunt || []).forEach(function (s) { present[s] = true; }); });
-            var cats = ["all"].concat(STUNTS.filter(function (s) { return present[s]; }));
-            cats.forEach(function (c, idx) {
-                var b = document.createElement("button");
-                b.type = "button";
-                b.className = "filter-chip" + (idx === 0 ? " active" : "");
-                b.textContent = t("filter." + c);
-                b.setAttribute("data-filter", c);
-                b.addEventListener("click", function () {
-                    bar.querySelectorAll(".filter-chip").forEach(function (x) { x.classList.remove("active"); });
-                    b.classList.add("active");
-                    render(c);
-                });
-                bar.appendChild(b);
-            });
-        }
-        render("all");
-    }
-
-    /* ---------- Filmography + filter ---------- */
-    var PRODS = ["feature", "series", "commercial", "musicvideo", "international"];
-    function setupFilmography() {
-        var host = document.querySelector("[data-filmography]");
-        if (!host || !window.BENZ_FILMOGRAPHY) return;
-        var bar = document.querySelector("[data-film-filter]");
-        var grid = document.createElement("div");
-        grid.className = "references-grid";
-        host.appendChild(grid);
-
-        function render(filter) {
-            grid.innerHTML = "";
-            window.BENZ_FILMOGRAPHY.forEach(function (c) {
-                if (filter !== "all" && c.productionType !== filter) return;
-                var art = document.createElement("article");
-                art.className = "reference-card";
-                var link = c.link ? '<a class="reference-link" href="' + c.link + '" target="_blank" rel="noopener">' + (LANG === "en" ? "View reference" : "Voir la référence") + '</a>' : "";
-                var poster = c.poster
-                    ? '<img src="' + media(c.poster) + '" alt="' + (LANG === "en" ? "Poster — " : "Affiche — ") + c.title + '" loading="lazy" decoding="async">'
-                    : placeholder("");
-                art.innerHTML =
-                    '<div class="reference-poster">' + poster + '</div>' +
-                    '<div class="reference-info">' +
-                        '<span class="reference-type">' + t("prod." + c.productionType) + '</span>' +
-                        '<h3>' + c.title + '</h3>' +
-                        '<p>' + cap(c, "role") + '</p>' +
-                        '<span class="reference-year">' + c.year + '</span>' + link +
-                    '</div>';
-                grid.appendChild(art);
-            });
-        }
-        if (bar) {
-            var present = {};
-            window.BENZ_FILMOGRAPHY.forEach(function (c) { present[c.productionType] = true; });
-            var cats = ["all"].concat(PRODS.filter(function (p) { return present[p]; }));
-            cats.forEach(function (c, idx) {
-                var b = document.createElement("button");
-                b.type = "button";
-                b.className = "filter-chip" + (idx === 0 ? " active" : "");
-                b.textContent = c === "all" ? t("filter.all") : t("prod." + c);
-                b.addEventListener("click", function () {
-                    bar.querySelectorAll(".filter-chip").forEach(function (x) { x.classList.remove("active"); });
-                    b.classList.add("active");
-                    render(c);
-                });
-                bar.appendChild(b);
-            });
-        }
-        render("all");
-
-        // partner logos
-        var logoHost = document.querySelector("[data-partners]");
-        if (logoHost && window.BENZ_PARTNERS) {
-            window.BENZ_PARTNERS.forEach(function (name) {
-                var s = document.createElement("span");
-                s.className = "partner-logo"; s.textContent = name;
-                logoHost.appendChild(s);
-            });
-        }
-    }
-
-    /* ---------- Testimonials ---------- */
-    function setupTestimonials() {
-        var host = document.querySelector("[data-testimonials]");
-        if (!host || !window.BENZ_TESTIMONIALS) return;
-        window.BENZ_TESTIMONIALS.forEach(function (item) {
-            var d = document.createElement("blockquote");
-            d.className = "testimonial-card";
-            d.innerHTML =
-                '<svg class="quote-mark" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h4v6H7v4H3v-6c0-2.2 1.8-4 4-4zm10 0h4v6h-4v4h-4v-6c0-2.2 1.8-4 4-4z"/></svg>' +
-                '<p>' + cap(item, "quote") + '</p>' +
-                '<footer><strong>' + item.name + '</strong><span>' + cap(item, "role") + '</span></footer>';
-            host.appendChild(d);
-        });
-    }
-
-    /* ---------- Press kit ---------- */
-    function setupPressKit() {
-        document.querySelectorAll("[data-presskit]").forEach(function (btn) {
-            var file = btn.getAttribute("data-presskit"); // path or empty
-            btn.addEventListener("click", function (e) {
-                if (!file) {
-                    e.preventDefault();
-                    showToast(t("presskit.preparing"));
-                }
-            });
-        });
-    }
-
-    /* ---------- Contact form ---------- */
-    function setupForm() {
-        var form = document.getElementById("contactForm");
-        if (!form) return;
-
-        // preselect service from ?service=
-        var params = new URLSearchParams(location.search);
-        var svc = params.get("service");
-        var sel = form.querySelector("#cascade-type");
-        if (svc && sel) {
-            Array.prototype.forEach.call(sel.options, function (o) { if (o.value === svc) o.selected = true; });
-        }
-
-        function setError(field, msg) {
-            var grp = field.closest(".form-group");
-            if (!grp) return;
-            var e = grp.querySelector(".field-error");
-            if (!e) { e = document.createElement("span"); e.className = "field-error"; grp.appendChild(e); }
-            e.textContent = msg || "";
-            field.setAttribute("aria-invalid", msg ? "true" : "false");
-        }
-        function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            var ok = true, firstBad = null;
-            form.querySelectorAll("[required]").forEach(function (f) {
-                if (!f.value.trim()) {
-                    setError(f, t("form.required")); ok = false; if (!firstBad) firstBad = f;
-                } else if (f.type === "email" && !validEmail(f.value.trim())) {
-                    setError(f, t("form.email")); ok = false; if (!firstBad) firstBad = f;
-                } else setError(f, "");
-            });
-            if (!ok) { if (firstBad) firstBad.focus(); return; }
-
-            var name = (form.querySelector("#name") || {}).value || "";
-            var email = (form.querySelector("#email") || {}).value || "";
-            var project = (form.querySelector("#project") || {}).value || "";
-            var type = (form.querySelector("#cascade-type") || {}).value || "";
-            var locationValue = (form.querySelector("#location") || {}).value || "";
-            var dates = (form.querySelector("#dates") || {}).value || "";
-            var description = (form.querySelector("#description") || {}).value || "";
-
-            var subject = "Demande BENZ-ACTION" + (project ? " - " + project : "");
-            var body = [
-                "Nom / Name: " + name,
-                "Email: " + email,
-                "Projet / Project: " + project,
-                "Type de cascade / Type of stunt: " + type,
-                "Lieu de tournage / Shooting location: " + locationValue,
-                "Dates: " + dates,
-                "",
-                "Descriptif technique / Technical description:",
-                description,
-                "",
-                "Envoye depuis / Sent from: " + location.href
-            ].join("\n");
-
-            window.location.href = "mailto:contact@benzaction.com?subject=" +
-                encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-            showToast(LANG === "en" ? "Your email app is opening. Please send the prepared message." : "Votre application mail va s'ouvrir. Envoyez le message prepare.");
-        });
-    }
-
-    /* ---------- Toast ---------- */
-    function showToast(msg) {
-        var t0 = document.createElement("div");
-        t0.className = "benz-toast";
-        t0.textContent = msg;
-        document.body.appendChild(t0);
-        requestAnimationFrame(function () { t0.classList.add("show"); });
-        setTimeout(function () { t0.classList.remove("show"); setTimeout(function () { t0.remove(); }, 400); }, 4200);
-    }
-
-    /* ---------- Smooth scroll for in-page anchors ---------- */
-    function setupSmoothScroll() {
-        document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-            a.addEventListener("click", function (e) {
-                var id = this.getAttribute("href");
-                if (id.length < 2) return;
-                var target = document.querySelector(id);
-                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" }); }
-            });
-        });
-    }
-
-    /* ---------- Active nav link ---------- */
-    function setupActiveNav() {
-        var page = document.body.getAttribute("data-page");
-        if (!page) return;
-        document.querySelectorAll("#navLinks a[data-nav]").forEach(function (a) {
-            if (a.getAttribute("data-nav") === page) {
-                a.classList.add("is-active");
-                a.setAttribute("aria-current", "page");
-            }
-        });
-    }
-
-    /* ---------- Init ---------- */
-    document.addEventListener("DOMContentLoaded", function () {
-        applyI18n();
-        setupLangSwitcher();
-        setupNavbar();
-        setupActiveNav();
-        setupAos();
-        setupCounters();
-        setupParticles();
-        setupShowreel();
-        setupGallery();
-        setupFilmography();
-        setupTestimonials();
-        setupPressKit();
-        setupForm();
-        setupSmoothScroll();
+  if (burger && menu) {
+    burger.addEventListener("click", function () {
+      var open = menu.classList.toggle("is-open");
+      burger.classList.toggle("is-open", open);
+      burger.setAttribute("aria-expanded", open ? "true" : "false");
+      document.body.style.overflow = open ? "hidden" : "";
     });
+    menu.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        menu.classList.remove("is-open");
+        burger.classList.remove("is-open");
+        document.body.style.overflow = "";
+      });
+    });
+  }
+
+  /* ---------- Scroll progress bar ---------- */
+  var progress = document.querySelector(".progress");
+  if (progress) {
+    var onProg = function () {
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + "%";
+    };
+    window.addEventListener("scroll", onProg, { passive: true });
+    onProg();
+  }
+
+  /* ---------- Split hero title into chars ---------- */
+  document.querySelectorAll("[data-split]").forEach(function (el) {
+    var idx = 0;
+    el.querySelectorAll(".line").forEach(function (line) {
+      var cls = line.className.replace("line", "").trim();
+      var text = line.textContent;
+      line.textContent = "";
+      text.split("").forEach(function (ch) {
+        var s = document.createElement("span");
+        s.className = "char";
+        s.style.setProperty("--i", idx++);
+        s.textContent = ch;
+        line.appendChild(s);
+      });
+      if (cls) line.className = "line " + cls;
+    });
+  });
+
+  /* ---------- Reveal on scroll ---------- */
+  var revealIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.classList.add("is-in");
+        revealIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+
+  function observeReveals(root) {
+    (root || document).querySelectorAll("[data-reveal]").forEach(function (el) {
+      revealIO.observe(el);
+    });
+  }
+
+  /* ---------- Stats count-up ---------- */
+  var statIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      statIO.unobserve(e.target);
+      var el = e.target;
+      var target = parseInt(el.getAttribute("data-count"), 10) || 0;
+      if (REDUCED || target === 0) { el.firstChild.nodeValue = target; return; }
+      var t0 = null, dur = 1600;
+      function tick(t) {
+        if (!t0) t0 = t;
+        var p = Math.min((t - t0) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 4);
+        el.firstChild.nodeValue = Math.round(target * eased);
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll("[data-count]").forEach(function (el) { statIO.observe(el); });
+
+  /* ---------- Kinetic statement: light words as they pass ---------- */
+  document.querySelectorAll("[data-statement]").forEach(function (block) {
+    var p = block.querySelector("p");
+    if (!p) return;
+    var html = p.textContent.trim().split(/\s+/).map(function (w) {
+      var red = w.charAt(0) === "*";
+      if (red) w = w.slice(1);
+      return '<span class="w' + (red ? " red" : "") + '">' + w + "</span>";
+    }).join(" ");
+    p.innerHTML = html;
+    var words = p.querySelectorAll(".w");
+    function update() {
+      var r = block.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var prog = (vh * 0.85 - r.top) / (r.height + vh * 0.4);
+      prog = Math.max(0, Math.min(1, prog));
+      var lit = Math.floor(prog * words.length * 1.15);
+      words.forEach(function (w, i) { w.classList.toggle("lit", i < lit); });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  });
+
+  /* ---------- Sticky showreel: scroll-driven scale + word swap ---------- */
+  var reel = document.querySelector(".reel");
+  if (reel) {
+    var frame = reel.querySelector(".reel__frame");
+    var video = reel.querySelector("video");
+    var words = reel.querySelectorAll(".reel__word");
+    var soundBtn = reel.querySelector(".reel__sound");
+    var startScale = MOBILE ? 0.7 : 0.45;
+    var ticking = false;
+
+    function reelUpdate() {
+      ticking = false;
+      var r = reel.getBoundingClientRect();
+      var total = r.height - window.innerHeight;
+      var p = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
+      if (frame && !REDUCED) {
+        // scale from startScale up to full-bleed
+        var grow = Math.min(1, p / 0.55);
+        var e = 1 - Math.pow(1 - grow, 3);
+        var scale = startScale + (1 - startScale) * e;
+        var full = Math.max(0, (p - 0.6) / 0.4); // beyond: expand to viewport
+        var vw = window.innerWidth, fw = frame.offsetWidth;
+        var extra = 1 + full * Math.max(0, vw / fw - 1);
+        frame.style.transform = "scale(" + (scale * extra).toFixed(4) + ")";
+        frame.style.borderRadius = full > 0.5 ? "0px" : "6px";
+      }
+      // word swap across progress
+      if (words.length) {
+        var seg = 1 / words.length;
+        words.forEach(function (w, i) {
+          var on = p >= i * seg && p < (i + 1) * seg + (i === words.length - 1 ? 1 : 0);
+          w.classList.toggle("is-on", on && p > 0.02);
+        });
+      }
+    }
+    function onReelScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(reelUpdate); }
+    }
+    window.addEventListener("scroll", onReelScroll, { passive: true });
+    window.addEventListener("resize", onReelScroll);
+    reelUpdate();
+
+    // Autoplay muted when visible; button to unmute
+    if (video) {
+      var vIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { video.play().catch(function () {}); }
+          else { video.pause(); }
+        });
+      }, { threshold: 0.25 });
+      vIO.observe(video);
+      if (soundBtn) {
+        soundBtn.addEventListener("click", function () {
+          video.muted = !video.muted;
+          if (!video.muted) video.play().catch(function () {});
+          soundBtn.textContent = video.muted ? soundBtn.getAttribute("data-on") : soundBtn.getAttribute("data-off");
+        });
+      }
+    }
+  }
+
+  /* ---------- Pseudo-3D tilt (pointer on desktop, idle sway on touch) ---------- */
+  document.querySelectorAll(".tilt-wrap").forEach(function (wrap) {
+    var card = wrap.querySelector(".tilt");
+    if (!card || REDUCED) return;
+    if (window.matchMedia("(hover: hover)").matches) {
+      wrap.addEventListener("pointermove", function (ev) {
+        var r = wrap.getBoundingClientRect();
+        var x = (ev.clientX - r.left) / r.width - 0.5;
+        var y = (ev.clientY - r.top) / r.height - 0.5;
+        card.style.transform = "rotateY(" + (x * 14) + "deg) rotateX(" + (-y * 10) + "deg) translateZ(0)";
+      });
+      wrap.addEventListener("pointerleave", function () {
+        card.style.transform = "rotateY(0) rotateX(0)";
+      });
+    } else {
+      // gentle scroll-linked sway on touch devices
+      window.addEventListener("scroll", function () {
+        var r = wrap.getBoundingClientRect();
+        var c = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+        card.style.transform = "rotateY(" + (c * -8) + "deg) rotateX(" + (c * 4) + "deg)";
+      }, { passive: true });
+    }
+  });
+
+  /* ---------- Parallax (subtle) ---------- */
+  if (!REDUCED && !MOBILE) {
+    var pxEls = document.querySelectorAll("[data-parallax]");
+    if (pxEls.length) {
+      window.addEventListener("scroll", function () {
+        requestAnimationFrame(function () {
+          pxEls.forEach(function (el) {
+            var sp = parseFloat(el.getAttribute("data-parallax")) || 0.15;
+            var r = el.getBoundingClientRect();
+            var off = (r.top + r.height / 2 - window.innerHeight / 2) * sp;
+            el.style.transform = "translateY(" + off.toFixed(1) + "px)";
+          });
+        });
+      }, { passive: true });
+    }
+  }
+
+  /* ---------- Data renderers (from assets/data.js) ---------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function media(p) { return p ? BASE + p : ""; }
+
+  // Filmography cards
+  document.querySelectorAll("[data-filmography]").forEach(function (mount) {
+    var limit = parseInt(mount.getAttribute("data-limit"), 10) || 0;
+    var items = (window.BENZ_FILMOGRAPHY || []).slice();
+    if (limit) items = items.slice(0, limit);
+    var typeLabel = {
+      feature: { en: "Feature film", fr: "Long-métrage" },
+      series: { en: "Series", fr: "Série" },
+      commercial: { en: "Commercial", fr: "Publicité" }
+    };
+    var html = '<div class="films">';
+    items.forEach(function (f, i) {
+      var role = LANG === "fr" ? f.role_fr : f.role_en;
+      var tl = typeLabel[f.productionType];
+      var kind = tl ? (LANG === "fr" ? tl.fr : tl.en) : "";
+      var inner =
+        (f.poster
+          ? '<img src="' + esc(media(f.poster)) + '" alt="' + esc(f.title) + " (" + f.year + ') — poster" loading="lazy">'
+          : '<div class="film__grad"></div>') +
+        '<div class="film__grad"></div>' +
+        '<div class="film__meta">' +
+        '<span class="film__year">' + f.year + (kind ? " · " + esc(kind) : "") + "</span>" +
+        '<h3 class="film__title">' + esc(f.title) + "</h3>" +
+        '<p class="film__role">' + esc(role) + "</p>" +
+        "</div>";
+      html += f.link
+        ? '<a class="film" href="' + esc(f.link) + '" target="_blank" rel="noopener" data-reveal style="--d:' + (i % 4) * 0.08 + 's">' + inner + "</a>"
+        : '<article class="film" data-reveal style="--d:' + (i % 4) * 0.08 + 's">' + inner + "</article>";
+    });
+    html += "</div>";
+    mount.innerHTML = html;
+    observeReveals(mount);
+  });
+
+  // Partners marquee
+  document.querySelectorAll("[data-partners]").forEach(function (mount) {
+    var names = window.BENZ_PARTNERS || [];
+    var spans = names.map(function (n) { return "<span>" + esc(n) + "</span>"; }).join("");
+    mount.innerHTML = '<div class="partners__track">' + spans + spans + "</div>";
+  });
+
+  // Testimonials
+  document.querySelectorAll("[data-testimonials]").forEach(function (mount) {
+    var html = "";
+    (window.BENZ_TESTIMONIALS || []).forEach(function (t, i) {
+      var q = LANG === "fr" ? t.quote_fr : t.quote_en;
+      var role = LANG === "fr" ? t.role_fr : t.role_en;
+      html += '<article class="quote" data-reveal style="--d:' + i * 0.1 + 's"><p>' + esc(q) + "</p>" +
+        "<footer><cite>" + esc(t.name) + "</cite><small>" + esc(role) + "</small></footer></article>";
+    });
+    mount.innerHTML = html;
+    observeReveals(mount);
+  });
+
+  // Gallery (filterable)
+  document.querySelectorAll("[data-gallery]").forEach(function (mount) {
+    var withFilters = mount.getAttribute("data-filters") === "true";
+    var limit = parseInt(mount.getAttribute("data-limit"), 10) || 0;
+    var items = (window.BENZ_GALLERY || []).slice();
+    if (limit) items = items.slice(0, limit);
+
+    var cats = [
+      { id: "all", en: "All", fr: "Tout" },
+      { id: "automobile", en: "Automobile", fr: "Automobile" },
+      { id: "combat", en: "Combat", fr: "Combat" },
+      { id: "height", en: "Heights / Aerial", fr: "Hauteur / Voltige" },
+      { id: "pyrotechnics", en: "Pyrotechnics", fr: "Pyrotechnie" },
+      { id: "safety", en: "Safety", fr: "Sécurité" }
+    ];
+
+    var html = "";
+    if (withFilters) {
+      html += '<div class="gal-filters" role="group">';
+      cats.forEach(function (c, i) {
+        html += '<button type="button" data-filter="' + c.id + '"' + (i === 0 ? ' class="is-active"' : "") + ">" +
+          esc(LANG === "fr" ? c.fr : c.en) + "</button>";
+      });
+      html += "</div>";
+    }
+    html += '<div class="gal-grid">';
+    items.forEach(function (g, i) {
+      var cap = LANG === "fr" ? g.caption_fr : g.caption_en;
+      var stunts = (g.stunt || []).join(" ");
+      html += '<figure class="gal-item" data-stunts="' + esc(stunts) + '" data-reveal style="--d:' + (i % 3) * 0.08 + 's">';
+      if (g.type === "video" && g.src) {
+        html += '<video controls playsinline preload="metadata"' +
+          (g.poster ? ' poster="' + esc(media(g.poster)) + '"' : "") + ">" +
+          '<source src="' + esc(media(g.src)) + '" type="video/mp4">' +
+          '<p class="gal-fallback">' + (LANG === "fr" ? "Votre navigateur ne peut pas lire cette vidéo." : "Your browser cannot play this video.") + "</p>" +
+          "</video>";
+      } else if (g.src) {
+        html += '<img src="' + esc(media(g.src)) + '" alt="' + esc(cap) + '" loading="lazy">';
+      }
+      html += "<figcaption>" + esc(cap) + "</figcaption></figure>";
+    });
+    html += "</div>";
+    mount.innerHTML = html;
+    observeReveals(mount);
+
+    if (withFilters) {
+      var buttons = mount.querySelectorAll("[data-filter]");
+      var figures = mount.querySelectorAll(".gal-item");
+      buttons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          buttons.forEach(function (b) { b.classList.remove("is-active"); });
+          btn.classList.add("is-active");
+          var f = btn.getAttribute("data-filter");
+          figures.forEach(function (fig) {
+            var show = f === "all" || (fig.getAttribute("data-stunts") || "").split(" ").indexOf(f) !== -1;
+            fig.classList.toggle("is-hidden", !show);
+            // pause hidden videos
+            if (!show) { var v = fig.querySelector("video"); if (v) v.pause(); }
+          });
+        });
+      });
+    }
+  });
+
+  /* ---------- Contact form -> mailto ---------- */
+  var form = document.getElementById("contactForm");
+  if (form) {
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      function val(id) { var el = form.querySelector("#" + id); return el ? el.value.trim() : ""; }
+      var project = val("f-project") || (LANG === "fr" ? "Nouveau projet" : "New project");
+      var L = LANG === "fr"
+        ? { name: "Nom", email: "Email", project: "Projet", type: "Type de cascade", loc: "Lieu de tournage", dates: "Dates envisagées", desc: "Description technique" }
+        : { name: "Name", email: "Email", project: "Project", type: "Type of stunt", loc: "Shooting location", dates: "Envisaged dates", desc: "Technical description" };
+      var body =
+        L.name + ": " + val("f-name") + "\n" +
+        L.email + ": " + val("f-email") + "\n" +
+        L.project + ": " + project + "\n" +
+        L.type + ": " + val("f-type") + "\n" +
+        L.loc + ": " + val("f-location") + "\n" +
+        L.dates + ": " + val("f-dates") + "\n\n" +
+        L.desc + ":\n" + val("f-desc");
+      var subject = "BENZ-ACTION request - " + project;
+      window.location.href = "mailto:contact@benzaction.com?subject=" +
+        encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    });
+  }
+
+  /* ---------- Lazy-play looping ambient videos ---------- */
+  document.querySelectorAll("video[data-ambient]").forEach(function (v) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) v.play().catch(function () {});
+        else v.pause();
+      });
+    }, { threshold: 0.15 });
+    io.observe(v);
+  });
+
+  /* ---------- Init reveals ---------- */
+  observeReveals(document);
 })();
