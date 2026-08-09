@@ -100,7 +100,7 @@ window.BENZ_GALLERY = [
 window.BENZ_FILMOGRAPHY = [
 
     { title: "Love Is Never Gone", year: 2025, productionType: "series",
-      poster: "assets/media/poster-love-is-never-gone.png",
+      poster: "assets/media/poster-love-is-never-gone.jpg",
       link: "https://corporate.abs-cbn.com/newsroom/news-releases/2025/11/13/joshua-and-ivana-star-in-first-filipino-tv-series-shot-in-morocco?lang=en",
       stunt: ["automobile", "combat", "safety"],
       role_fr: "Cascades & coordination action",
