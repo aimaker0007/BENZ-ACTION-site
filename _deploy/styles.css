@@ -34,6 +34,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 img, video, svg { max-width: 100%; display: block; }
+/* max-width above clamps the width, so without this an <img> carrying width/height
+   attributes keeps its attribute height and gets squashed. Class rules that set a
+   real height (.nav__logo img, .footer__brand img, .film img) still win. */
+img { height: auto; }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }

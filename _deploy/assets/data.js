@@ -28,19 +28,19 @@ window.BENZ_GALLERY = [
     // VIDÉOS de vos réalisations (fichiers locaux)
     { id: "g1", type: "video", stunt: ["automobile", "combat", "pyrotechnics"],
       src: "assets/media/clip-escape-outland.mp4",
-      poster: "assets/media/poster-escape-outland.jpg",
+      poster: "assets/media/still-escape-outland.jpg",
       youtube: "",
       caption_fr: "Escape from the Outland (2025) — action", caption_en: "Escape from the Outland (2025) — action" },
 
     { id: "g2", type: "video", stunt: ["combat", "safety"],
       src: "assets/media/clip-trauma-code.mp4",
-      poster: "assets/media/poster-trauma-code.jpg",
+      poster: "assets/media/still-trauma-code.jpg",
       youtube: "",
       caption_fr: "The Trauma Code (2025) — combat", caption_en: "The Trauma Code (2025) — combat" },
 
     { id: "g3", type: "video", stunt: ["automobile", "combat"],
       src: "assets/media/clip-ransomed.mp4",
-      poster: "assets/media/poster-ransomed.jpg",
+      poster: "assets/media/still-ransomed.jpg",
       youtube: "",
       caption_fr: "Ransomed — séquence d'action", caption_en: "Ransomed — action sequence" },
 
