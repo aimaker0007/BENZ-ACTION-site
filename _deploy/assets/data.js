@@ -68,24 +68,7 @@ window.BENZ_GALLERY = [
 
     { id: "g9", type: "video", stunt: ["pyrotechnics"],
       src: "assets/media/clip-fire-stunt.mp4", poster: "", youtube: "",
-      caption_fr: "Cascade de feu — pyrotechnie", caption_en: "Fire stunt — pyrotechnics" },
-
-    // PHOTOS / affiches (catégorisées)
-    { id: "g10", type: "photo", stunt: ["pyrotechnics", "combat"],
-      src: "assets/media/poster-raqqa.jpg", poster: "", youtube: "",
-      caption_fr: "Raqqa (2024)", caption_en: "Raqqa (2024)" },
-
-    { id: "g11", type: "photo", stunt: ["automobile"],
-      src: "assets/media/poster-escape-outland.jpg", poster: "", youtube: "",
-      caption_fr: "Escape from the Outland (2025)", caption_en: "Escape from the Outland (2025)" },
-
-    { id: "g12", type: "photo", stunt: ["combat", "safety"],
-      src: "assets/media/poster-trauma-code.jpg", poster: "", youtube: "",
-      caption_fr: "The Trauma Code (2025)", caption_en: "The Trauma Code (2025)" },
-
-    { id: "g13", type: "photo", stunt: ["automobile", "combat"],
-      src: "assets/media/poster-ransomed.jpg", poster: "", youtube: "",
-      caption_fr: "Ransomed (2024)", caption_en: "Ransomed (2024)" }
+      caption_fr: "Cascade de feu — pyrotechnie", caption_en: "Fire stunt — pyrotechnics" }
 
     // POUR AJOUTER UN MÉDIA : copiez une ligne ci-dessus, mettez une virgule
     // après la précédente, donnez un id unique (g10, g11…) et vos infos.
