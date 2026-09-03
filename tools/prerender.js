@@ -272,9 +272,15 @@ function schemaFilmography(DATA, lang, pageUrl) {
   };
 }
 
-/* uploadDate volontairement absent : la vraie date de mise en ligne du
-   showreel doit venir du client. Le bloc reste du schema.org valide ;
-   ajouter uploadDate le rendra éligible au rich result vidéo Google. */
+/* uploadDate : novembre 2025, indiqué par le client au mois près.
+   Le jour est fixé au 1er faute de date exacte — à préciser si elle
+   est retrouvée. Sans uploadDate, Google refuse d'indexer la vidéo.
+   duration : mesurée sur le fichier (133,61 s = 2 min 13 s).
+   thumbnailUrl : le still 1280x720 du showreel, qui correspond au
+   format paysage de la vidéo et à l'affiche réellement montrée sur la
+   page. Ne pas y remettre une affiche de film portrait.
+   embedUrl est volontairement absent : la vidéo est auto-hébergée en
+   <video>, il n'existe pas d'URL de lecteur ; contentUrl suffit. */
 function schemaShowreel(lang, pageUrl) {
   return {
     '@context': 'https://schema.org',
@@ -283,9 +289,10 @@ function schemaShowreel(lang, pageUrl) {
     description: lang === 'fr'
       ? 'Cascades automobiles, combats, cascades de feu et chutes, filmés sur de vraies productions au Maroc et à l’international.'
       : 'Car stunts, screen fights, fire stunts and falls, filmed on real productions in Morocco and abroad.',
-    thumbnailUrl: [SITE + 'assets/media/poster-raqqa.webp'],
+    thumbnailUrl: [SITE + 'assets/media/still-showreel.webp'],
     contentUrl: SITE + 'assets/media/showreel-2025.mp4',
-    embedUrl: pageUrl,
+    uploadDate: '2025-11-01',
+    duration: 'PT2M13S',
     inLanguage: lang,
     publisher: { '@id': ORG_ID }
   };
