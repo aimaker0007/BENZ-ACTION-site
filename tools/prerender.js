@@ -197,6 +197,11 @@ function injectMount(html, attr, produce) {
    remplacée à chaque exécution. */
 
 const ORG_ID = 'https://benzaction.com/#organization';
+/* Au générique, les films créditent la personne (Youness Benzakour),
+   pas la société. Le nœud Person est déclaré dans le bloc JSON-LD
+   statique de chaque page ; Google fusionne les blocs d'une même page,
+   donc la référence par @id se résout. */
+const FOUNDER_ID = 'https://benzaction.com/#founder';
 const SITE = 'https://benzaction.com/';
 
 /* Les 6 disciplines : contenu fixe (pas dans data.js) */
@@ -260,8 +265,11 @@ function schemaFilmography(DATA, lang, pageUrl) {
         '@type': TYPE[f.productionType] || 'CreativeWork',
         name: f.title,
         datePublished: String(f.year),
-        // BENZ-ACTION a fourni les services cascades : contributor, pas productionCompany.
-        contributor: { '@id': ORG_ID }
+        // contributor et non productionCompany : BENZ-ACTION a fourni les
+        // services cascades, elle n'a pas produit ces films. La personne est
+        // citée en plus de la société, parce que c'est elle qui est créditée
+        // au générique et sur IMDb — c'est le pont entre les deux entités.
+        contributor: [{ '@id': ORG_ID }, { '@id': FOUNDER_ID }]
       };
       if (f.poster) work.image = SITE + f.poster;
       if (f.link) work.sameAs = f.link;
