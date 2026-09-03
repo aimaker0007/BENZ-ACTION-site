@@ -368,27 +368,148 @@
     }
   });
 
-  /* ---------- Contact form -> mailto ---------- */
+  /* ---------- Formulaire de contact ---------- */
+  /* Le formulaire ouvre le client mail via mailto:. Sur un poste sans
+     client mail configuré (cas courant en entreprise), rien ne se passe
+     et le brief est perdu. On affiche donc systématiquement un repli :
+     le message rédigé, copiable, plus un envoi WhatsApp. */
   var form = document.getElementById("contactForm");
   if (form) {
+    var T = LANG === "fr"
+      ? { name: "Nom", email: "Email", project: "Projet", type: "Type de cascade",
+          loc: "Lieu de tournage", dates: "Dates envisagées", desc: "Description technique",
+          required: "Merci de remplir ce champ.", badEmail: "Adresse email invalide.",
+          ready: "Votre brief est prêt",
+          hint: "Votre logiciel de messagerie devrait s'ouvrir. S'il ne s'ouvre pas, copiez le message ci-dessous ou envoyez-le sur WhatsApp.",
+          copy: "Copier le message", copied: "Copié !", mail: "Ouvrir dans le mail", wa: "Envoyer sur WhatsApp",
+          fallbackProject: "Nouveau projet" }
+      : { name: "Name", email: "Email", project: "Project", type: "Type of stunt",
+          loc: "Shooting location", dates: "Envisaged dates", desc: "Technical description",
+          required: "Please fill in this field.", badEmail: "Invalid email address.",
+          ready: "Your brief is ready",
+          hint: "Your email app should open. If it does not, copy the message below or send it on WhatsApp.",
+          copy: "Copy the message", copied: "Copied!", mail: "Open in mail", wa: "Send on WhatsApp",
+          fallbackProject: "New project" };
+
+    function val(id) { var el = form.querySelector("#" + id); return el ? el.value.trim() : ""; }
+
+    function setError(id, msg) {
+      var el = form.querySelector("#" + id);
+      if (!el) return;
+      var field = el.closest(".field");
+      var old = field.querySelector(".field-err");
+      if (old) old.remove();
+      el.setAttribute("aria-invalid", msg ? "true" : "false");
+      if (msg) {
+        var p = document.createElement("p");
+        p.className = "field-err";
+        p.textContent = msg;
+        field.appendChild(p);
+      }
+    }
+
+    function validate() {
+      var ok = true;
+      ["f-name", "f-project"].forEach(function (id) {
+        var v = val(id);
+        setError(id, v ? "" : T.required);
+        if (!v) ok = false;
+      });
+      var mail = val("f-email");
+      var mailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
+      setError("f-email", mail ? (mailOk ? "" : T.badEmail) : T.required);
+      if (!mail || !mailOk) ok = false;
+      if (!ok) {
+        var first = form.querySelector('[aria-invalid="true"]');
+        if (first) { first.focus(); }
+      }
+      return ok;
+    }
+
+    function buildBrief() {
+      var project = val("f-project") || T.fallbackProject;
+      var body =
+        T.name + ": " + val("f-name") + "\n" +
+        T.email + ": " + val("f-email") + "\n" +
+        T.project + ": " + project + "\n" +
+        T.type + ": " + val("f-type") + "\n" +
+        T.loc + ": " + val("f-location") + "\n" +
+        T.dates + ": " + val("f-dates") + "\n\n" +
+        T.desc + ":\n" + val("f-desc");
+      return { subject: "BENZ-ACTION request - " + project, body: body };
+    }
+
+    function showFallback(brief) {
+      var panel = document.getElementById("briefFallback");
+      if (!panel) {
+        panel = document.createElement("div");
+        panel.id = "briefFallback";
+        panel.className = "brief-fallback";
+        panel.setAttribute("role", "status");
+        form.appendChild(panel);
+      }
+      panel.innerHTML = "";
+
+      var h = document.createElement("strong");
+      h.textContent = T.ready;
+      var p = document.createElement("p");
+      p.textContent = T.hint;
+      var ta = document.createElement("textarea");
+      ta.readOnly = true;
+      ta.rows = 8;
+      ta.value = brief.body;
+
+      var row = document.createElement("div");
+      row.className = "brief-fallback__actions";
+
+      var copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "btn btn--ghost";
+      copyBtn.textContent = T.copy;
+      copyBtn.addEventListener("click", function () {
+        function done() { copyBtn.textContent = T.copied; setTimeout(function () { copyBtn.textContent = T.copy; }, 2500); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(brief.body).then(done, function () { ta.select(); });
+        } else { ta.select(); try { document.execCommand("copy"); done(); } catch (e) {} }
+      });
+
+      var mailLink = document.createElement("a");
+      mailLink.className = "btn btn--ghost";
+      mailLink.href = "mailto:contact@benzaction.com?subject=" +
+        encodeURIComponent(brief.subject) + "&body=" + encodeURIComponent(brief.body);
+      mailLink.textContent = T.mail;
+
+      var waLink = document.createElement("a");
+      waLink.className = "btn btn--primary";
+      waLink.target = "_blank";
+      waLink.rel = "noopener";
+      waLink.href = "https://wa.me/212674616348?text=" + encodeURIComponent(brief.body);
+      waLink.textContent = T.wa;
+
+      row.appendChild(copyBtn);
+      row.appendChild(mailLink);
+      row.appendChild(waLink);
+      panel.appendChild(h);
+      panel.appendChild(p);
+      panel.appendChild(ta);
+      panel.appendChild(row);
+      panel.scrollIntoView({ block: "nearest" });
+    }
+
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
-      function val(id) { var el = form.querySelector("#" + id); return el ? el.value.trim() : ""; }
-      var project = val("f-project") || (LANG === "fr" ? "Nouveau projet" : "New project");
-      var L = LANG === "fr"
-        ? { name: "Nom", email: "Email", project: "Projet", type: "Type de cascade", loc: "Lieu de tournage", dates: "Dates envisagées", desc: "Description technique" }
-        : { name: "Name", email: "Email", project: "Project", type: "Type of stunt", loc: "Shooting location", dates: "Envisaged dates", desc: "Technical description" };
-      var body =
-        L.name + ": " + val("f-name") + "\n" +
-        L.email + ": " + val("f-email") + "\n" +
-        L.project + ": " + project + "\n" +
-        L.type + ": " + val("f-type") + "\n" +
-        L.loc + ": " + val("f-location") + "\n" +
-        L.dates + ": " + val("f-dates") + "\n\n" +
-        L.desc + ":\n" + val("f-desc");
-      var subject = "BENZ-ACTION request - " + project;
-      window.location.href = "mailto:contact@benzaction.com?subject=" +
-        encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      if (!validate()) return;
+      var brief = buildBrief();
+      showFallback(brief);
+      try {
+        window.location.href = "mailto:contact@benzaction.com?subject=" +
+          encodeURIComponent(brief.subject) + "&body=" + encodeURIComponent(brief.body);
+      } catch (e) { /* le repli est déjà affiché */ }
+    });
+
+    ["f-name", "f-email", "f-project"].forEach(function (id) {
+      var el = form.querySelector("#" + id);
+      if (el) el.addEventListener("input", function () { setError(id, ""); });
     });
   }
 
