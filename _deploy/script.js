@@ -10,6 +10,16 @@
   var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var MOBILE = window.matchMedia("(max-width: 880px)").matches;
 
+  /* Connexion econome : ne pas telecharger automatiquement les videos
+     lourdes (le showreel fait ~18 Mo et tourne en boucle). */
+  function prefersLightMedia() {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return false;
+    if (c.saveData) return true;
+    return /(^|-)2g$/.test(c.effectiveType || "");
+  }
+  var LIGHT_MEDIA = prefersLightMedia();
+
   /* ---------- Navbar ---------- */
   var nav = document.querySelector(".nav");
   var burger = document.getElementById("navToggle");
@@ -169,7 +179,11 @@
     reelUpdate();
 
     // Autoplay muted when visible; button to unmute
-    if (video) {
+    if (video && LIGHT_MEDIA) {
+      // connexion limitee : on garde le poster, lecture a la demande
+      video.setAttribute("preload", "none");
+      video.addEventListener("click", function () { video.play().catch(function () {}); });
+    } else if (video) {
       var vIO = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (e.isIntersecting) { video.play().catch(function () {}); }
@@ -380,6 +394,7 @@
 
   /* ---------- Lazy-play looping ambient videos ---------- */
   document.querySelectorAll("video[data-ambient]").forEach(function (v) {
+    if (LIGHT_MEDIA) { v.setAttribute("preload", "none"); v.removeAttribute("autoplay"); return; }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) v.play().catch(function () {});
