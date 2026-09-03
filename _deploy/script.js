@@ -389,6 +389,22 @@
     io.observe(v);
   });
 
+  /* ---------- Lien profond vers une section ancrée ---------- */
+  /* Les sections sont masquées (opacity:0) jusqu-au reveal au scroll.
+     Sans ça, arriver sur services.html#pyrotechnics-physical-fx laisse
+     la page en haut, sur une zone vide. On révèle la cible puis on y va. */
+  function jumpToHash() {
+    if (!location.hash || location.hash.length < 2) return;
+    var el;
+    try { el = document.querySelector(location.hash); } catch (e) { return; }
+    if (!el) return;
+    el.classList.add("is-in");
+    el.querySelectorAll("[data-reveal]").forEach(function (c) { c.classList.add("is-in"); });
+    requestAnimationFrame(function () { el.scrollIntoView({ block: "start" }); });
+  }
+  window.addEventListener("load", jumpToHash);
+  window.addEventListener("hashchange", jumpToHash);
+
   /* ---------- Init reveals ---------- */
   observeReveals(document);
 })();

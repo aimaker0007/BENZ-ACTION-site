@@ -30,6 +30,17 @@ jobs:
         with:
           enablement: true
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Injecte le contenu de assets/data.js dans le HTML livré, pour que les
+      # robots qui n'exécutent pas JavaScript voient les films, témoignages,
+      # partenaires et la galerie. Idempotent.
+      - name: Prerender data-driven sections
+        run: node tools/prerender.js
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
